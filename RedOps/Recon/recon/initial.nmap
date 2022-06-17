@@ -1,0 +1,1 @@
+# Nmap 7.80 scan initiated Mon May 23 18:55:53 2022 as: nmap -v -sV -O --top-ports 49 --open -oA recon/initial 10.129.18.34

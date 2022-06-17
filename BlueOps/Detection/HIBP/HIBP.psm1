@@ -1,4 +1,9 @@
-﻿function Get-HIBPToken {
+﻿# HIBP.psm1 - haveibeenpwned API Powershell Module
+# Author: Gualberto S. Maciel / HAUNTER
+# Email: gualberto.s.maciel@gmail.com
+# Github: https://github.com/OPFOR-HAUNTER
+
+function Get-HIBPToken {
 <#
 .SYNOPSIS
     Gets the haveibeenpwned API token required for all API calls.
@@ -20,7 +25,7 @@
    Get-HIBPToken
         Gets API token from default filepath and logs in the current directory.
    
-   Get-HIBPToken -filepath "D:\Operations\token.txt" -logpath $logpath
+   Get-HIBPToken -filepath $filepath -logpath $logpath
         Gets API token from specified path and logs at $logpath string.
 
    Get-HIBPUsersByBreach -HIBPUsers ($HIBPUsers = Get-HIBPUsers -logpath $logpath) -HIBPBreaches (Get-HIBPBreaches -dayperiod -365 -HIBPToken (Get-HIBPToken -logpath $logpath) -logpath $logpath ) -HIBPToken (Get-HIBPToken) -logpath $logpath        
@@ -28,17 +33,12 @@
 
 .LINK
     https://haveibeenpwned.com/API/v3
-
-.NOTES
-    Author: William Maciel <william.maciel@arb.ca.gov>
-    Security Information Specialist
-    Security Operations Center
 #>
     [CmdletBinding()]
     
     param (
         # path to API token
-        [string] $filepath = "C:\Operations\Tokens\CARB_HIBP_Token.txt",
+        [string] $filepath = "Tokens\HIBP_Token.txt",
         [string] $logpath = "HIBP.log"
     )
 
@@ -100,11 +100,6 @@ function Get-HIBPBreachByPeriod {
 
 .LINK
     https://haveibeenpwned.com/API/v3
-
-.NOTES
-    Author: William Maciel <william.maciel@arb.ca.gov>
-    Security Information Specialist
-    Security Operations Center
 #>
     [CmdletBinding()]
     param ( 
@@ -361,7 +356,7 @@ function Get-HIBPUsers {
     }
     
     process{
-        # get CARB active users file to process and validate
+        # get active users file to process and validate
         # if an AD user file was specified
         if($filepath){
             Out-File -FilePath $logpath -Append -InputObject "Using file at $filepath"
@@ -498,7 +493,7 @@ function Get-HIBPUsersByBreach {
             Start-Sleep -m 1600
         }
 
-        $HIBPUsersByBreach =  Get-Content -Path C:\Operations\HIBP\HIBPUsersByBreach.json | ConvertFrom-Json
+        $HIBPUsersByBreach =  Get-Content -Path HIBP\HIBPUsersByBreach.json | ConvertFrom-Json
         $HIBPUsersByBreach | ConvertTo-Json -Depth 10| Out-File -FilePath "HIBPUsersByBreach.json" # file for automations
         $HIBPUsersByBreach.Psobject.Properties.Name | ForEach-Object{ # files for records
             if($HIBPUsersByBreach.$_ -ne ''){

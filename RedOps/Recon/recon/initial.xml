@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE nmaprun>
+<?xml-stylesheet href="file:///usr/bin/../share/nmap/nmap.xsl" type="text/xsl"?>
+<!-- Nmap 7.80 scan initiated Mon May 23 18:55:53 2022 as: nmap -v -sV -O -&#45;top-ports 49 -&#45;open -oA recon/initial 10.129.18.34 -->
+<nmaprun scanner="nmap" args="nmap -v -sV -O -&#45;top-ports 49 -&#45;open -oA recon/initial 10.129.18.34" start="1653346553" startstr="Mon May 23 18:55:53 2022" version="7.80" xmloutputversion="1.04">
+<scaninfo type="syn" protocol="tcp" numservices="49" services="21-23,25-26,53,80-81,110-111,113,135,139,143,179,199,443,445,465,514-515,548,554,587,993,995,1025-1027,1433,1720,1723,2000-2001,3306,3389,5060,5666,5900,6001,8000,8008,8080,8443,8888,10000,32768,49152,49154"/>
+<verbose level="1"/>
+<debugging level="0"/>
+<taskbegin task="Ping Scan" time="1653346553"/>
+<taskend task="Ping Scan" time="1653346554" extrainfo="1 total hosts"/>
+<taskbegin task="Parallel DNS resolution of 1 host." time="1653346554"/>
+<taskend task="Parallel DNS resolution of 1 host." time="1653346554"/>
+<taskbegin task="SYN Stealth Scan" time="1653346554"/>
+<taskend task="SYN Stealth Scan" time="1653346559" extrainfo="49 total ports"/>
+<taskbegin task="Service scan" time="1653346560"/>
