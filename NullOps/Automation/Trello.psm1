@@ -24,18 +24,26 @@ function Get-Trello {
      -listId 
         [string] The listId value of th targeted list
      -listCards
-        [switch] Setthis
+        [switch] Setting this switch will pull all cards for a specified list.
      -card
+        [switch] Setting this switch will pull a specific card.
      -labels
+        [switch] Setting this switch will pull labels for a specified list
 .OUTPUTS
-    Outputs a JSON object and a log file (Get-Trello.log). 
+    Outputs a JSON object $trello and a log file (Get-Trello.log). 
 
 .EXAMPLE
     Get the lists objects available
         Get-Trello -board -getLists
 
-    Get cards from a specific list (default is the Incidents list)
+    Get a specific list's JSON object
         Get-Trello -list -listId [your listId here]
+    
+    Get a specific list's cards.
+        Get-Trello -list -listId [your listId here] -listCards 
+
+    Get a specific card.
+        Get-Trello -card
 
 .LINK
     https://developers.trello.com/reference#introduction
@@ -48,8 +56,8 @@ function Get-Trello {
         [string] [Parameter(ParameterSetName = 'list', Position = 1)] $listId = '[your listId here]', # get specific list info by id, default is Incidents listId
         [switch] [Parameter(ParameterSetName = 'list', Position = 2)] $listCards, # get all cards from a specific list
         [switch] [Parameter(ParameterSetName = 'card', Position = 0)] $card, # get a specific card from a list
-        [switch] [Parameter(ParameterSetName = 'lables', Position = 0)] $labels, # get a specific card from a list
-        [string] $logpath = $PSScriptRoot + '\Get-Trello.log'
+        [switch] [Parameter(ParameterSetName = 'lables', Position = 0)] $labels, # get labels from a list
+        [string] $logpath = 'Get-Trello.log'
     )
     
     begin {
@@ -103,8 +111,8 @@ function Get-Trello {
         # try the call       
         try {
             Out-File -FilePath $logpath -Force -InputObject "Initiating API call with URI $apiCall" -Append
-            $resultsObj = Invoke-RestMethod -Uri $apiCall -UserAgent $userAgent
-            Out-File -FilePath $logpath -Force -InputObject $resultsObj -Append
+            $trello = Invoke-RestMethod -Uri $apiCall -UserAgent $userAgent
+            Out-File -FilePath $logpath -Force -InputObject $trello -Append
         }
         catch {
             $ErrorMessage = $_.Exception.Message
@@ -113,7 +121,7 @@ function Get-Trello {
         }
     }
     end {
-        return $resultsObj
+        return $trello
     }
 }
 
@@ -181,8 +189,8 @@ function New-Trello {
         # try the call       
         try {
             Out-File -FilePath $logpath -Force -InputObject "Initiating API call with URI $apiCall" -Append
-            $resultsObj = Invoke-RestMethod -Uri $apiCall -UserAgent $userAgent -Method Post
-            Out-File -FilePath $logpath -Force -InputObject $resultsObj -Append
+            $trello = Invoke-RestMethod -Uri $apiCall -UserAgent $userAgent -Method Post
+            Out-File -FilePath $logpath -Force -InputObject $trello -Append
         }
         catch {
             $ErrorMessage = $_.Exception.Message
@@ -191,7 +199,7 @@ function New-Trello {
         }
     }
     end {
-        return $resultsObj
+        return $trello
     }
 }
 
@@ -309,8 +317,8 @@ function Remove-Trello {
         # try the call       
         try {
             Out-File -FilePath $logpath -Force -InputObject "Initiating API call with URI $apiCall" -Append
-            $resultsObj = Invoke-RestMethod -Uri $apiCall -UserAgent $userAgent -Method Delete
-            Out-File -FilePath $logpath -Force -InputObject $resultsObj -Append
+            $trello = Invoke-RestMethod -Uri $apiCall -UserAgent $userAgent -Method Delete
+            Out-File -FilePath $logpath -Force -InputObject $trello -Append
         }
         catch {
             $ErrorMessage = $_.Exception.Message
