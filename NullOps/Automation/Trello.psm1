@@ -9,10 +9,24 @@ function Get-Trello {
     Gets JSON objects from a specified Trello board. 
 
 .DESCRIPTION
-    
+    Gets JSON objects from a specified Trello board. Objects can be specified among four choices:
+    board, list, card, and lables.
 
 .INPUTS
+    -board
+        [switch] Setting this switch sets the API to request the board JSON object.
 
+    -getLists
+        [switch] Setting this switch will retrieve all list JSON objects.
+
+     -list
+        [switch] Setting this switch will retrieve a specific list's JSOn object
+     -listId 
+        [string] The listId value of th targeted list
+     -listCards
+        [switch] Setthis
+     -card
+     -labels
 .OUTPUTS
     Outputs a JSON object and a log file (Get-Trello.log). 
 
@@ -21,7 +35,7 @@ function Get-Trello {
         Get-Trello -board -getLists
 
     Get cards from a specific list (default is the Incidents list)
-        Get-Trello -list -listId 5b69b61773e7c85a6c14b890
+        Get-Trello -list -listId [your listId here]
 
 .LINK
     https://developers.trello.com/reference#introduction
@@ -31,12 +45,11 @@ function Get-Trello {
         [switch] [Parameter(ParameterSetName = 'board', Position = 0)] $board, # board call mode
         [switch] [Parameter(ParameterSetName = 'board', Position = 1)] $getLists, # get all list infos
         [switch] [Parameter(ParameterSetName = 'list', Position = 0)] $list, # list call mode
-        [string] [Parameter(ParameterSetName = 'list', Position = 1)] $listId = '5b69b61773e7c85a6c14b890', # get specific list info by id, default is Incidents listId
+        [string] [Parameter(ParameterSetName = 'list', Position = 1)] $listId = '[your listId here]', # get specific list info by id, default is Incidents listId
         [switch] [Parameter(ParameterSetName = 'list', Position = 2)] $listCards, # get all cards from a specific list
         [switch] [Parameter(ParameterSetName = 'card', Position = 0)] $card, # get a specific card from a list
         [switch] [Parameter(ParameterSetName = 'lables', Position = 0)] $labels, # get a specific card from a list
- 
-        [string] $logPath = $PSScriptRoot + '\Get-Trello.log'
+        [string] $logpath = $PSScriptRoot + '\Get-Trello.log'
     )
     
     begin {
@@ -51,9 +64,9 @@ function Get-Trello {
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
         # begin log
-        Out-File -FilePath $logPath -InputObject ( "*********************************************" ) -Append
-        Out-File -FilePath $logPath -Force -InputObject "Initiating API call to ISO Active Tasks Trello Board" -Append
-        Out-File -FilePath $logPath -Force -InputObject ("New-Trello.ps1 Runtime " + (Get-Date -format g))  -Append
+        Out-File -FilePath $logpath -InputObject ( "*********************************************" ) -Append
+        Out-File -FilePath $logpath -Force -InputObject "Initiating API call to ISO Active Tasks Trello Board" -Append
+        Out-File -FilePath $logpath -Force -InputObject ("New-Trello.ps1 Runtime " + (Get-Date -format g))  -Append
     }
     process {
 
@@ -61,42 +74,42 @@ function Get-Trello {
         if ($board) {
             if($getLists){
                 $apiCall = "https://api.trello.com/1/boards/$boardId/?fields=lists&lists=all&list_fields=all&$apiCreds"
-                Out-File -FilePath $logPath -Force -InputObject "Getting all lists available on the board..." -Append
+                Out-File -FilePath $logpath -Force -InputObject "Getting all lists available on the board..." -Append
             }else{
                 $apiCall = "https://api.trello.com/1/boards/$boardId/?$apiCreds"
-                Out-File -FilePath $logPath -Force -InputObject "Getting board infos..." -Append
+                Out-File -FilePath $logpath -Force -InputObject "Getting board infos..." -Append
             }
         }
         elseif ($list -and !$listCards){
             $apiCall = "https://api.trello.com/1/lists/$listId/?fields=all&$apiCreds"
-            Out-File -FilePath $logPath -Force -InputObject "Getting all cards on listId $listId..." -Append
+            Out-File -FilePath $logpath -Force -InputObject "Getting all cards on listId $listId..." -Append
         }
         elseif ($list -and $listCards) {
             $apiCall = "https://api.trello.com/1/lists/$listId/cards/?fields=all&$apiCreds"
-            Out-File -FilePath $logPath -Force -InputObject "Getting all cards on listId $listId..." -Append
+            Out-File -FilePath $logpath -Force -InputObject "Getting all cards on listId $listId..." -Append
         }
         elseif ($lables) {
             $apiCall = "https://api.trello.com/1/boards/$boardId/labels?$apiCreds"
-            Out-File -FilePath $logPath -Force -InputObject "Getting lables info..." -Append
+            Out-File -FilePath $logpath -Force -InputObject "Getting lables info..." -Append
         }elseif ($cards) {
             $apiCall = "https://api.trello.com/1/lists/$listId/cards/?fields=all&$apiCreds"
-            Out-File -FilePath $logPath -Force -InputObject ("Getting card info..." + $apiCall) -Append
+            Out-File -FilePath $logpath -Force -InputObject ("Getting card info..." + $apiCall) -Append
         }      
         else { 
-            Out-File -FilePath $logPath -Force -InputObject "Error building the API URI. Exiting." -Append
+            Out-File -FilePath $logpath -Force -InputObject "Error building the API URI. Exiting." -Append
             break 
         }
               
         # try the call       
         try {
-            Out-File -FilePath $logPath -Force -InputObject "Initiating API call with URI $apiCall" -Append
+            Out-File -FilePath $logpath -Force -InputObject "Initiating API call with URI $apiCall" -Append
             $resultsObj = Invoke-RestMethod -Uri $apiCall -UserAgent $userAgent
-            Out-File -FilePath $logPath -Force -InputObject $resultsObj -Append
+            Out-File -FilePath $logpath -Force -InputObject $resultsObj -Append
         }
         catch {
             $ErrorMessage = $_.Exception.Message
             $FailedItem = $_.Exception.ItemName
-            Out-File -FilePath $logPath -Append -InputObject ("There was an error: " + $ErrorMessage) -Append
+            Out-File -FilePath $logpath -Append -InputObject ("There was an error: " + $ErrorMessage) -Append
         }
     }
     end {
@@ -139,7 +152,7 @@ function New-Trello {
         [string] [Parameter(ParameterSetName = 'card', Position = 3)] $desc = '',
         [string] [Parameter(ParameterSetName = 'card', Position = 4)] $pos = 'bottom',
         [string] [Parameter(ParameterSetName = 'card', Position = 5)] $idLabels = '57c3003784e677fd361e2823', # default is the IR label, can add multiple seperated by comma
-        [string] $logPath = $PSScriptRoot + '\New-Trello.log'
+        [string] $logpath = $PSScriptRoot + '\New-Trello.log'
     )
     
     begin {
@@ -152,29 +165,29 @@ function New-Trello {
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
         # begin log
-        Out-File -FilePath $logPath -InputObject ( "*********************************************" )  -Append
-        Out-File -FilePath $logPath -Force -InputObject "Initiating API call to ISO Active Tasks Trello Board" -Append
+        Out-File -FilePath $logpath -InputObject ( "*********************************************" )  -Append
+        Out-File -FilePath $logpath -Force -InputObject "Initiating API call to ISO Active Tasks Trello Board" -Append
     }
     process {
         if ($card) {
             $apiCall = "https://api.trello.com/1/cards?idList=" + [uri]::EscapeUriString($listId) + "&name=" + [uri]::EscapeUriString($name) + "&desc=" + ($desc) + "&pos=" + [uri]::EscapeUriString($pos) + "&idLabels=" + [uri]::EscapeUriString($idLabels) + "&$apiCreds"
-            Out-File -FilePath $logPath -Force -InputObject "Creating new card..." -Append
+            Out-File -FilePath $logpath -Force -InputObject "Creating new card..." -Append
         }   
         else { 
-            Out-File -FilePath $logPath -Force -InputObject "Error building the API URI. Exiting." -Append
+            Out-File -FilePath $logpath -Force -InputObject "Error building the API URI. Exiting." -Append
             break 
         }
         
         # try the call       
         try {
-            Out-File -FilePath $logPath -Force -InputObject "Initiating API call with URI $apiCall" -Append
+            Out-File -FilePath $logpath -Force -InputObject "Initiating API call with URI $apiCall" -Append
             $resultsObj = Invoke-RestMethod -Uri $apiCall -UserAgent $userAgent -Method Post
-            Out-File -FilePath $logPath -Force -InputObject $resultsObj -Append
+            Out-File -FilePath $logpath -Force -InputObject $resultsObj -Append
         }
         catch {
             $ErrorMessage = $_.Exception.Message
             $FailedItem = $_.Exception.ItemName
-            Out-File -FilePath $logPath -Append -InputObject ("There was an error: " + $ErrorMessage)
+            Out-File -FilePath $logpath -Append -InputObject ("There was an error: " + $ErrorMessage)
         }
     }
     end {
@@ -188,58 +201,58 @@ function Get-TrelloListDetails {
         [string] [Parameter(ParameterSetName = 'listId', Position = 0)] $listId,
         [string] [Parameter(ParameterSetName = 'name', Position = 0)] $name,
         [switch] [Parameter(ParameterSetName = 'all', Position = 0)] $all,  
-        [string] $logPath = $PSScriptRoot + '\Get-TrelloListDetails.log' 
+        [string] $logpath = $PSScriptRoot + '\Get-TrelloListDetails.log' 
     )
     
     begin {
         $runtime = get-date -Format g
 
         # begin log
-        Out-File -FilePath $logPath -InputObject ( "*********************************************" ) -force  -Append
-        Out-File -FilePath $logPath -Force -InputObject "Get-TrelloListDetails initiating $runtime" -Append
+        Out-File -FilePath $logpath -InputObject ( "*********************************************" ) -force  -Append
+        Out-File -FilePath $logpath -Force -InputObject "Get-TrelloListDetails initiating $runtime" -Append
     }
     
     process {
         # try to get all available lists
         if($all){
             try{
-                Out-File -FilePath $logPath -Append -InputObject ("Atempting API call to get all available list details...")
+                Out-File -FilePath $logpath -Append -InputObject ("Atempting API call to get all available list details...")
                 $listDetailsRaw = Get-Trello -board -getLists
                 $listDetails = $listDetailsRaw.lists
             }
             catch{
                 $ErrorMessage = $_.Exception.Message
                 $FailedItem = $_.Exception.ItemName
-                Out-File -FilePath $logPath -Append -InputObject ("There was an error getting list details for all lists: " + $ErrorMessage)
+                Out-File -FilePath $logpath -Append -InputObject ("There was an error getting list details for all lists: " + $ErrorMessage)
                 break
             }
         }
         # try to get list details for list that matches listId
         if($listId){
             try{
-                Out-File -FilePath $logPath -Append -InputObject ("Atempting API call to get list details for listId $listId")
+                Out-File -FilePath $logpath -Append -InputObject ("Atempting API call to get list details for listId $listId")
                 $listDetailsRaw = Get-Trello -list -listId $listId
                 $listDetails = $listDetailsRaw
             }
             catch{
                 $ErrorMessage = $_.Exception.Message
                 $FailedItem = $_.Exception.ItemName
-                Out-File -FilePath $logPath -Append -InputObject ("There was an error getting list details for listId $listId  " + $ErrorMessage)
+                Out-File -FilePath $logpath -Append -InputObject ("There was an error getting list details for listId $listId  " + $ErrorMessage)
                 break
             }
         }
         # try to find a listId for a list with a name that matches $name
         if($name){
             try{
-                Out-File -FilePath $logPath -Append -InputObject ("Atempting API call to get list details for list $name")
+                Out-File -FilePath $logpath -Append -InputObject ("Atempting API call to get list details for list $name")
                 $listDetailsRaw = Get-Trello -board -getLists
                 #$nameRegEx = '.' + $name +'.'
 
                 # search each returned list object for a match with $name
                 $listDetailsRaw.lists | ForEach-Object{
-                    Out-File -FilePath $logPath -Append -InputObject ("List Name: " + $_.name)
+                    Out-File -FilePath $logpath -Append -InputObject ("List Name: " + $_.name)
                     if($_.name -imatch $name){
-                        Out-File -FilePath $logPath -Append -InputObject ("Atempting API call to get list details for listId " + $_.id)
+                        Out-File -FilePath $logpath -Append -InputObject ("Atempting API call to get list details for listId " + $_.id)
                         $listDetails = Get-Trello -list -listId $_.id
                         break
                     }
@@ -248,16 +261,16 @@ function Get-TrelloListDetails {
             catch{
                 $ErrorMessage = $_.Exception.Message
                 $FailedItem = $_.Exception.ItemName
-                Out-File -FilePath $logPath -Append -InputObject ("There was an error getting list details for list $name " + $ErrorMessage)
+                Out-File -FilePath $logpath -Append -InputObject ("There was an error getting list details for list $name " + $ErrorMessage)
                 break
             }
         }
     }
     
     end {
-        Out-File -FilePath $logPath -Append -InputObject ("Returned list details:") -force
+        Out-File -FilePath $logpath -Append -InputObject ("Returned list details:") -force
         $listDetails | ForEach-Object{
-            Out-File -FilePath $logPath -Append -InputObject ($_) -force
+            Out-File -FilePath $logpath -Append -InputObject ($_) -force
         }
         return $listDetails
     }
@@ -268,7 +281,7 @@ function Remove-Trello {
         [switch] $card, # switch to delete a card object,
 
         [string] $objID, # object ID to target
-        [string] $logPath = $PSScriptRoot + '\Remove-Trello.log'
+        [string] $logpath = $PSScriptRoot + '\Remove-Trello.log'
     )
     begin{
         # set API Call values
@@ -280,29 +293,29 @@ function Remove-Trello {
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
         # begin log
-        Out-File -FilePath $logPath -InputObject ( "*********************************************" )
-        Out-File -FilePath $logPath -Force -InputObject "Initiating API call to ISO Active Tasks Trello Board" -Append
+        Out-File -FilePath $logpath -InputObject ( "*********************************************" )
+        Out-File -FilePath $logpath -Force -InputObject "Initiating API call to ISO Active Tasks Trello Board" -Append
     }
     process{    
         if ($card) {
             $apiCall = "https://api.trello.com/1/cards/" + $objID + "?$apiCreds"
-            Out-File -FilePath $logPath -Force -InputObject "Attempting to delete card $objID" -Append
+            Out-File -FilePath $logpath -Force -InputObject "Attempting to delete card $objID" -Append
         }   
         else { 
-            Out-File -FilePath $logPath -Force -InputObject "Error building the API URI. Aborting." -Append
+            Out-File -FilePath $logpath -Force -InputObject "Error building the API URI. Aborting." -Append
             break 
         }
 
         # try the call       
         try {
-            Out-File -FilePath $logPath -Force -InputObject "Initiating API call with URI $apiCall" -Append
+            Out-File -FilePath $logpath -Force -InputObject "Initiating API call with URI $apiCall" -Append
             $resultsObj = Invoke-RestMethod -Uri $apiCall -UserAgent $userAgent -Method Delete
-            Out-File -FilePath $logPath -Force -InputObject $resultsObj -Append
+            Out-File -FilePath $logpath -Force -InputObject $resultsObj -Append
         }
         catch {
             $ErrorMessage = $_.Exception.Message
             $FailedItem = $_.Exception.ItemName
-            Out-File -FilePath $logPath -Append -InputObject ("There was an error: " + $ErrorMessage)
+            Out-File -FilePath $logpath -Append -InputObject ("There was an error: " + $ErrorMessage)
         }
     }
     end{
